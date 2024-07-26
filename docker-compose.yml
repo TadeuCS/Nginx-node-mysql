@@ -15,13 +15,14 @@ services:
       - app-network
     ports:
       - "3306:3306"
-
   node:
     build:
       context: node
     image: tadeucs/nginx-node-mysql:latest
     container_name: node
     tty: true
+    entrypoint: dockerize -wait tcp://mysql:3306 -timeout 10s docker-entrypoint.sh
+    command: sh -c "npm install && npm start"
     environment:
       DB_HOST: mysql
       DB_USER: root
@@ -34,10 +35,10 @@ services:
     depends_on:
       - mysql
     volumes:
-      - ./node:/usr/src/app
+      - ./node/app:/usr/src/app
 
   nginx:
-    image: nginx:latest
+    image: nginx:1.15.0-alpine
     container_name: nginx
     ports:
       - "8080:80"
@@ -51,6 +52,6 @@ services:
 volumes:
   mysql-data:
 
+
 networks:
   app-network:
-    driver: bridge
